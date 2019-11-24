@@ -13,6 +13,7 @@ const {
   Role,
   User,
   UsersFlavors,
+  UserFlavorNote,
   UserProfile,
   UsersRoles,
   Vendor
@@ -716,5 +717,272 @@ router.get('/current', authenticate(), async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
+/**
+ * GET User Flavor Notes
+ * @param userId int
+ */
+router.get(
+  '/:userId(\\d+)/notes',
+  authenticate(),
+  [
+    param('userId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { userId } = req.params;
+
+    log.info(`request flavor notes for user ${userId}`);
+    try {
+      const result = await UserFlavorNote.findAll({
+        where: {
+          userId
+        },
+        include: [
+          {
+            model: Flavor,
+            required: true,
+            include: [
+              {
+                model: Vendor,
+                required: true
+              }
+            ]
+          },
+          {
+            model: UserProfile,
+            required: true
+          }
+        ]
+      });
+
+      if (!Array.isArray(result) || result.length === 0) {
+        return res.status(204).end();
+      }
+
+      res.type('application/json');
+      res.json(result);
+    } catch (error) {
+      log.error(error.message);
+      res.status(500).send(error.message);
+    }
+  }
+);
+/**
+ * GET A User Flavor Note
+ * @param userId int
+ * @param flavorId int
+ */
+router.get(
+  '/:userId(\\d+)/note/:flavorId(\\d+)',
+  authenticate(),
+  [
+    param('userId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt(),
+    param('flavorId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    log.info(
+      `request flavor note flavor id ${req.params.flavorId} for user ${req.params.userId}`
+    );
+    try {
+      const { userId, flavorId } = req.params;
+      const result = await UserFlavorNote.findAll({
+        where: {
+          userId,
+          flavorId
+        },
+        include: [
+          {
+            model: Flavor,
+            required: true,
+            include: [
+              {
+                model: Vendor,
+                required: true
+              }
+            ]
+          },
+          {
+            model: UserProfile,
+            required: true
+          }
+        ]
+      });
+
+      if (!Array.isArray(result) || result.length === 0) {
+        return res.status(204).end();
+      }
+
+      res.type('application/json');
+      res.json(result);
+    } catch (error) {
+      log.error(error.message);
+      res.status(500).send(error.message);
+    }
+  }
+);
+/**
+ * POST Add User's Flavor Note
+ * @param userId int - User ID
+ */
+router.post(
+  '/:userId(\\d+)/note',
+  authenticate(),
+  [
+    param('userId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { userId } = req.params;
+    const { flavorId, created, note } = req.body;
+
+    log.info(`created flavor id ${flavorId} note for user id ${userId}`);
+    try {
+      const result = await UserFlavorNote.create({
+        userId,
+        flavorId,
+        created,
+        note
+      });
+
+      if (result.length === 0) {
+        return res.status(204).end();
+      }
+
+      res.type('application/json');
+      res.json(result);
+    } catch (error) {
+      log.error(error.message);
+      res.status(500).send(error.message);
+    }
+  }
+);
+/**
+ * PUT Update User's Flavor Note
+ * @param userId int
+ * @param flavorId int
+ */
+router.put(
+  '/:userId(\\d+)/note/:flavorId(\\d+)',
+  authenticate(),
+  [
+    param('userId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt(),
+    param('flavorId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { note } = req.body;
+    const { userId, flavorId } = req.params;
+
+    log.info(`updated flavor id ${flavorId} note user id ${userId}`);
+    try {
+      const result = await UserFlavorNote.update(
+        {
+          note
+        },
+        {
+          where: {
+            userId,
+            flavorId
+          }
+        }
+      );
+
+      if (result.length === 0) {
+        return res.status(204).end();
+      }
+
+      res.type('application/json');
+      res.json(result);
+    } catch (error) {
+      log.error(error.message);
+      res.status(500).send(error.message);
+    }
+  }
+);
+
+/**
+ * DELETE Remove User's Flavor Note
+ * @param userId int
+ * @param flavorId int
+ */
+router.delete(
+  '/:userId(\\d+)/note/:flavorId(\\d+)',
+  authenticate(),
+  [
+    param('userId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt(),
+    param('flavorId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { userId, flavorId } = req.params;
+
+    log.info(`deleted flavor id ${flavorId} note user id ${userId}`);
+    try {
+      const result = await UserFlavorNote.destroy({
+        where: {
+          userId,
+          flavorId
+        }
+      });
+
+      if (result.length === 0) {
+        return res.status(204).end();
+      }
+
+      res.type('application/json');
+      res.json(result);
+    } catch (error) {
+      log.error(error.message);
+      res.status(500).send(error.message);
+    }
+  }
+);
 
 export default router;
