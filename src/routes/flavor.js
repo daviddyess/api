@@ -7,7 +7,14 @@ import loggers from '../modules/logging';
 
 const router = Router();
 const log = loggers('flavor');
-const { DataSupplier, Flavor, FlavorIdentifier, Vendor } = models;
+const {
+  DataSupplier,
+  Flavor,
+  FlavorIdentifier,
+  UserFlavorNote,
+  UserProfile,
+  Vendor
+} = models;
 
 /**
  * GET Flavor by ID
@@ -470,6 +477,58 @@ router.delete(
       });
 
       if (!result || result.length === 0) {
+        return res.status(204).end();
+      }
+
+      res.type('application/json');
+      res.json(result);
+    } catch (error) {
+      log.error(error.message);
+      res.status(500).send(error.message);
+    }
+  }
+);
+
+/**
+ * GET Flavor Notes
+ * @param id int
+ */
+router.get(
+  '/:flavorId/notes',
+  authenticate(),
+  [
+    param('flavorId')
+      .isNumeric()
+      .isInt({ min: 1 })
+      .toInt()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { flavorId } = req.params;
+
+    log.info(`request for flavor id ${flavorId} notes`);
+    try {
+      const result = await UserFlavorNote.findAll({
+        where: {
+          flavorId
+        },
+        include: [
+          {
+            model: Flavor,
+            require: true
+          },
+          {
+            model: UserProfile,
+            require: true
+          }
+        ]
+      });
+
+      if (!Array.isArray(result) || result.length === 0) {
         return res.status(204).end();
       }
 

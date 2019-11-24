@@ -132,4 +132,43 @@ describe('user route resource', () => {
       .expect('Content-Type', /json/)
       .expect(200, done);
   });
+
+  it('GET user notes', done => {
+    request
+      .get('/12/notes')
+      .expect('Content-Type', /json/)
+      .expect(200, done);
+  });
+
+  it('GET a user note', done => {
+    request
+      .get('/12/note/13')
+      .expect('Content-Type', /json/)
+      .expect(200, done);
+  });
+
+  it('POST create a user note', done => {
+    request
+      .post('/12/note')
+      .send({
+        flavorId: 14,
+        note: 'This flavor is awesome!'
+      })
+      .expect('Content-type', /json/)
+      .expect(200, done);
+  });
+
+  it('PUT updates a user note', done => {
+    request
+      .put('/12/note/14')
+      .send({
+        note: 'This flavor is awesome! But Flavorah makes a better one...'
+      })
+      .expect('Content-type', /json/)
+      .expect(200, done);
+  });
+
+  it('DELETE deletes a user note', done => {
+    request.delete('/12/note/13').expect(200, done);
+  });
 });
