@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
+      underscored: true,
       tableName: 'ingredient',
       createdAt: 'created',
       updatedAt: 'updated'
@@ -50,7 +51,8 @@ module.exports = (sequelize, DataTypes) => {
 
   Ingredient.associate = function(models) {
     this.hasOne(models.IngredientCategory, {
-      foreignKey: 'ingredientCategoryId'
+      foreignKey: 'id',
+      sourceKey: 'ingredientCategoryId'
     });
   };
 

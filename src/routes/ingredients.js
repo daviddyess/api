@@ -42,6 +42,7 @@ router.get(
       const result = await Ingredient.findAll({
         limit,
         offset,
+        order: [['id', 'ASC']],
         include: [
           {
             model: IngredientCategory,
@@ -64,10 +65,10 @@ router.get(
 );
 
 /**
- * GET Ingredient Stats
+ * GET Ingredients Stats
  */
 router.get('/count', authenticate(), async (req, res) => {
-  log.info(`request for ingredient stats`);
+  log.info(`request for ingredients stats`);
   try {
     const result = await Ingredient.count();
 

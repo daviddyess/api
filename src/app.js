@@ -12,6 +12,7 @@ import diluent from 'routes/diluent';
 import diluents from 'routes/diluents';
 import flavor from 'routes/flavor';
 import flavors from 'routes/flavors';
+import ingredients from 'routes/ingredients';
 import preparation from 'routes/preparation';
 import preparations from 'routes/preparations';
 import recipe from 'routes/recipe';
@@ -45,6 +46,7 @@ export const start = async () => {
   app.use('/diluents', diluents);
   app.use('/flavor', flavor);
   app.use('/flavors', flavors);
+  app.use('/ingredients', ingredients);
   app.use('/preparation', preparation);
   app.use('/preparations', preparations);
   app.use('/recipe', recipe);
